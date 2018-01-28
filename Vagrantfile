@@ -26,7 +26,7 @@ config.vm.define "server1" do |server1|
        echo "192.168.100.101 server2" >> /etc/hosts
        mkdir /repo
        cd /repo
-       yum update -y
+       #yum update -y
        yum install git -y
        git clone https://github.com/nobumori/DevOps.git
        git checkout task2
@@ -39,7 +39,7 @@ config.vm.define "server2" do |server2|
     server2.vm.network "private_network", ip: "192.168.100.101"
     server2.vm.provision "shell", inline: <<-SHELL
       echo "192.168.100.100 server1" >> /etc/hosts
-      yum update -y
+      #yum update -y
     SHELL
 end
 end
