@@ -24,13 +24,12 @@ config.vm.define "server1" do |server1|
     server1.vm.network "private_network", ip: "192.168.100.100"
     server1.vm.provision "shell", inline: <<-SHELL
        echo "192.168.100.101 server2" >> /etc/hosts
-       mkdir /repo
-       cd /repo
        #yum update -y
        yum install git -y
        git clone https://github.com/nobumori/DevOps.git
+       cd DevOps
        git checkout task2
-       wall task2.txt
+       cat task2.txt
     SHELL
 end
 
