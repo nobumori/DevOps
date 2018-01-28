@@ -15,8 +15,8 @@ Vagrant.configure("2") do |config|
 config.vm.box = "bertvv/centos72"
 config.vm.provider "virtualbox" do |vb|
 	   vb.gui = true
-     vb.memory = 1024
-     vb.cpus = 1
+     vb.memory = 1524
+     vb.cpus = 2
 end
 
 config.vm.define "server1" do |server1|
@@ -24,11 +24,13 @@ config.vm.define "server1" do |server1|
     server1.vm.network "private_network", ip: "192.168.100.100"
     server1.vm.provision "shell", inline: <<-SHELL
        echo "192.168.100.101 server2" >> /etc/hosts
+       mkdir /repo
+       cd /repo
        yum update -y
        yum install git -y
        git clone https://github.com/nobumori/DevOps.git
        git checkout task2
-       cat task2.txt
+       wall task2.txt
     SHELL
 end
 
