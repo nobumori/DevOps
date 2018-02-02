@@ -39,6 +39,7 @@ config.vm.define "httpd" do |httpd|
      echo "worker.tomcat2.host=tomcat1" >> /etc/httpd/conf/workers.properties
      echo "worker.tomcat2.port=8009" >> /etc/httpd/conf/workers.properties
      echo "worker.tomcat2.type=ajp13" >> /etc/httpd/conf/workers.properties
+     
   SHELL
 end
 
