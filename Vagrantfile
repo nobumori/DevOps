@@ -14,9 +14,9 @@ Vagrant.configure("2") do |config|
   # boxes at https://vagrantcloud.com/search.
 config.vm.box = "bertvv/centos72"
 config.vm.provider "virtualbox" do |vb|
-	   vb.gui = true
-     vb.memory = 1524
-     vb.cpus = 2
+     vb.gui = true
+     vb.memory = 1024
+     vb.cpus = 1
 end
 
 config.vm.define "server1" do |server1|
@@ -25,12 +25,9 @@ config.vm.define "server1" do |server1|
     server1.vm.provision "shell", inline: <<-SHELL
        echo "192.168.100.101 server2" >> /etc/hosts
        #yum update -y
-       yum install git -y
-       git clone https://github.com/nobumori/DevOps.git
-       cd DevOps
-       git checkout task2
-       cat task2.txt
-    SHELL
+       git clone -b task2 https://github.com/nobumori/DevOps.git
+       cat DevOps/task2.txt
+      SHELL
 end
 
 config.vm.define "server2" do |server2|
