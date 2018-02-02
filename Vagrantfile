@@ -15,30 +15,62 @@ Vagrant.configure("2") do |config|
 config.vm.box = "bertvv/centos72"
 config.vm.provider "virtualbox" do |vb|
 	   vb.gui = true
-     vb.memory = 1524
-     vb.cpus = 2
+     vb.memory = 1024
+     vb.cpus = 1
 end
 
-config.vm.define "server1" do |server1|
-    server1.vm.hostname = "server1"
-    server1.vm.network "private_network", ip: "192.168.100.100"
-    server1.vm.provision "shell", inline: <<-SHELL
-       echo "192.168.100.101 server2" >> /etc/hosts
+config.vm.define "httpd" do |httpd|
+  httpd.vm.hostname = "httpd"
+  httpd.vm.network "forwarded_port", guest: 8080, host: 18080 
+  httpd.vm.network "private_network", ip: "192.168.100.100"
+  httpd.vm.provision "shell", inline: <<-SHELL
+     #yum update -y
+     yum install httpd -y
+     systemctl enable httpd
+     systemctl start httpd 
+     systemctl stop firewalld 
+     cp /vagrant/mod_jk.so /etc/httpd/modules/
+     echo "worker.list=lb" >> /etc/httpd/conf/workers.properties
+     echo "worker.lb.type=lb" >> /etc/httpd/conf/workers.properties
+     echo "worker.lb.balance_workers=tomcat1, tomcat2" >> /etc/httpd/conf/workers.properties
+     echo "worker.tomcat1.host=tomcat1" >> /etc/httpd/conf/workers.properties
+     echo "worker.tomcat1.port=8009" >> /etc/httpd/conf/workers.properties
+     echo "worker.tomcat1.type=ajp13" >> /etc/httpd/conf/workers.properties
+     echo "worker.tomcat2.host=tomcat1" >> /etc/httpd/conf/workers.properties
+     echo "worker.tomcat2.port=8009" >> /etc/httpd/conf/workers.properties
+     echo "worker.tomcat2.type=ajp13" >> /etc/httpd/conf/workers.properties
+  SHELL
+end
+
+
+
+
+config.vm.define "tomcat1" do |tomcat1|
+    tomcat1.vm.hostname = "tomcat1"
+    tomcat1.vm.network "private_network", ip: "192.168.100.101"
+    tomcat1.vm.provision "shell", inline: <<-SHELL
+       echo "192.168.100.101 tomcat2" >> /etc/hosts
        #yum update -y
-       yum install git -y
-       git clone https://github.com/nobumori/DevOps.git
-       cd DevOps
-       git checkout task2
-       cat task2.txt
+       yum install java-1.8.0-openjdk tomcat tomcat-webapps tomcat-admin-webapps -y
+       systemctl disable firewalld
+       systemctl enable tomcat 
+       systemctl start tomcat 
+       mkdir /usr/share/tomcat/webapps/testapp
+       echo "111_tomcat_111" >> /usr/share/tomcat/webapps/testapp/index.html       
     SHELL
 end
 
-config.vm.define "server2" do |server2|
-    server2.vm.hostname = "server2"
-    server2.vm.network "private_network", ip: "192.168.100.101"
-    server2.vm.provision "shell", inline: <<-SHELL
-      echo "192.168.100.100 server1" >> /etc/hosts
-      #yum update -y
+config.vm.define "tomcat2" do |tomcat2|
+    tomcat2.vm.hostname = "tomcat2"
+    tomcat2.vm.network "private_network", ip: "192.168.100.102"
+    tomcat2.vm.provision "shell", inline: <<-SHELL
+       #yum update -y
+       yum install java-1.8.0-openjdk tomcat tomcat-webapps tomcat-admin-webapps -y
+       systemctl disable firewalld
+       systemctl enable tomcat 
+       systemctl start tomcat 
+       mkdir /usr/share/tomcat/webapps/testapp
+       echo "222_tomcat_222" >> /usr/share/tomcat/webapps/testapp/index.html
     SHELL
 end
 end
