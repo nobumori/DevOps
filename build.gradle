@@ -1,0 +1,23 @@
+
+apply plugin: 'war'
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'log4j', name: 'log4j', version: '1.2.16'
+    compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
+}
+
+
+task a {
+    
+    def version = VERSION_NAME.toInteger() + 1
+    
+    }
+
+task b dependOn a { 
+        def outputFile = file("$buildDir/resources/main/greeting2.txt")
+        outputFile.write "Version: " + VERSION_NAME
+   
+}
