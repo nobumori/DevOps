@@ -13,21 +13,25 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
 
-VM_COUNT = 3
+VM_COUNT = 2
 
 config.vm.box = "bertvv/centos72"
 config.vm.provider "virtualbox" do |vb|
      vb.gui = true
-     vb.memory = 1024
+     vb.memory = 2048
      vb.cpus = 1
    end
 
     config.vm.define "httpd" do |httpd|
     httpd.vm.hostname = "httpd"
-    httpd.vm.network "forwarded_port", guest: 80, host: 8080 
+    httpd.vm.network "forwarded_port", guest: 80, host: 8008 
+    httpd.vm.network "forwarded_port", guest: 8080, host: 8080
+    httpd.vm.network "forwarded_port", guest: 8081, host: 8081
     httpd.vm.network "private_network", ip: "192.168.100.100"
     httpd.vm.provision "shell", inline: <<-SHELL
+       yum install -y java-1.8.0-openjdk
        yum install -y httpd
+       yum install -y net-tools
        systemctl stop firewalld
        systemctl disable firewalld
        cp /vagrant/mod_jk.so /etc/httpd/modules/   
@@ -40,6 +44,23 @@ config.vm.provider "virtualbox" do |vb|
        echo "JkLogLevel info" >> /etc/httpd/conf.d/lb.conf
        echo "JkMount /testapp* lb" >> /etc/httpd/conf.d/lb.conf
        systemctl enable httpd
+       
+       wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
+       rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
+       yum -y install jenkins
+       systemctl enable jenkins.service
+       systemctl start jenkins.service
+       mkdir /app && cd /app
+       wget https://sonatype-download.global.ssl.fastly.net/nexus/oss/nexus-2.14.7-01-bundle.tar.gz
+       tar xvf nexus-2.14.7-01-bundle.tar.gz -C /app
+       ln -s /app/nexus-2.14.7-01/ /app/nexus
+       adduser nexus
+       chown -R nexus:nexus /app/nexus-2.14.7-01
+       chown -R nexus:nexus /app/sonatype-work
+       export NEXUS_HOME=/app/nexus 
+       echo "RUN_AS_USER="nexus"" >> /app/nexus/bin/nexus
+       cd /app/nexus/bin/
+       #./nexus start nexus //start nexus from nexus user
        SHELL
     end
   
@@ -72,5 +93,5 @@ config.vm.provider "virtualbox" do |vb|
      SHELL
    end
   end
-end
+ end
 

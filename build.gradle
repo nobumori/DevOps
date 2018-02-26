@@ -1,0 +1,37 @@
+
+apply plugin: 'war'
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile group: 'log4j', name: 'log4j', version: '1.2.16', ext: 'jar' 
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+}
+
+
+task increment << {
+    group 'Other'
+    def v=file("gradle.properties").getText().find(version) 
+    String minor=v.substring(v.lastIndexOf('.')+1) 
+    int m=minor.toInteger()+1                      
+    String major=v.substring(0,v.length()-1)
+    println major       
+    String s="version="+major+m
+    println s
+    file("gradle.properties").setText(s)
+}
+
+task writeGreeting(type: Copy) {
+    from 'src/main/resources'
+    into 'build/resources/main'
+    doLast {
+        def v=file("gradle.properties").getText().find(version)
+        def outputFile = file("$buildDir/resources/main/greeting.txt")
+        outputFile.write "Version:'"+v+"'"
+        println "processing my task"
+    }    
+}
+
+classes.dependsOn writeGreeting
