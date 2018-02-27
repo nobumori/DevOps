@@ -32,6 +32,7 @@ config.vm.provider "virtualbox" do |vb|
        yum install -y java-1.8.0-openjdk
        yum install -y httpd
        yum install -y net-tools
+       yum install -y git
        systemctl stop firewalld
        systemctl disable firewalld
        cp /vagrant/mod_jk.so /etc/httpd/modules/   
@@ -64,8 +65,8 @@ config.vm.provider "virtualbox" do |vb|
        echo "RUN_AS_USER="nexus"" >> /app/nexus/bin/nexus
        cd /app/nexus/bin/
        ln -s /app/nexus/bin/nexus /etc/init.d/nexus
-       systemctl enable nexus
-       systemctl start nexus
+       ./nexus enable
+       ./nexus start
        SHELL
     end
   
