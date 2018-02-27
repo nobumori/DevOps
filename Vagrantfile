@@ -37,12 +37,15 @@ config.vm.provider "virtualbox" do |vb|
        cp /vagrant/mod_jk.so /etc/httpd/modules/   
        echo "worker.list=lb" >> /etc/httpd/conf/workers.properties
        echo "worker.lb.type=lb" >> /etc/httpd/conf/workers.properties
+       echo "worker.list=lb, status" >> /etc/httpd/conf/workers.properties
+       echo "worker.status.type=status" >> /etc/httpd/conf/workers.properties
        echo "LoadModule jk_module modules/mod_jk.so" >> /etc/httpd/conf.d/lb.conf
        echo "JkWorkersFile conf/workers.properties" >> /etc/httpd/conf.d/lb.conf
        echo "JkShmFile /tmp/shm" >> /etc/httpd/conf.d/lb.conf
        echo "JkLogFile logs/mod_jk.log" >> /etc/httpd/conf.d/lb.conf
        echo "JkLogLevel info" >> /etc/httpd/conf.d/lb.conf
        echo "JkMount /testapp* lb" >> /etc/httpd/conf.d/lb.conf
+       echo "JkMount /jkmanager* status" >> /etc/httpd/conf.d/lb.conf
        systemctl enable httpd
        
        wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
@@ -51,7 +54,7 @@ config.vm.provider "virtualbox" do |vb|
        systemctl enable jenkins.service
        systemctl start jenkins.service
        mkdir /app && cd /app
-       wget https://sonatype-download.global.ssl.fastly.net/nexus/oss/nexus-2.14.7-01-bundle.tar.gz
+       wget -c -N https://sonatype-download.global.ssl.fastly.net/nexus/oss/nexus-2.14.7-01-bundle.tar.gz
        tar xvf nexus-2.14.7-01-bundle.tar.gz -C /app
        ln -s /app/nexus-2.14.7-01/ /app/nexus
        adduser nexus
@@ -60,7 +63,9 @@ config.vm.provider "virtualbox" do |vb|
        export NEXUS_HOME=/app/nexus 
        echo "RUN_AS_USER="nexus"" >> /app/nexus/bin/nexus
        cd /app/nexus/bin/
-       #./nexus start nexus //start nexus from nexus user
+       ln -s /app/nexus/bin/nexus /etc/init.d/nexus
+       systemctl enable nexus
+       systemctl start nexus
        SHELL
     end
   
