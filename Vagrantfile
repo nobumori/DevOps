@@ -29,7 +29,7 @@ config.vm.provider "virtualbox" do |vb|
     httpd.vm.network "forwarded_port", guest: 8081, host: 8081
     httpd.vm.network "private_network", ip: "192.168.100.100"
     httpd.vm.provision "shell", inline: <<-SHELL
-       yum install -y java-1.8.0-openjdk
+       yum install -y java-1.8.0-openjdk-devel
        yum install -y httpd
        yum install -y net-tools
        yum install -y git
@@ -65,8 +65,6 @@ config.vm.provider "virtualbox" do |vb|
        echo "RUN_AS_USER="nexus"" >> /app/nexus/bin/nexus
        cd /app/nexus/bin/
        ln -s /app/nexus/bin/nexus /etc/init.d/nexus
-       ./nexus enable
-       ./nexus start
        SHELL
     end
   
