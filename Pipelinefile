@@ -1,0 +1,18 @@
+node {
+      stage('Preparation') { // for display purposes
+   
+          git branch: 'task6', url: 'https://github.com/nobumori/DevOps.git'
+      
+          
+      }
+   
+      stage('Build') {
+      
+      sh './gradlew build'
+      
+          }
+   
+      stage('Publish') {
+      
+   }
+}
