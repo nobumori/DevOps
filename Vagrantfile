@@ -18,7 +18,7 @@ VM_COUNT = 2
 config.vm.box = "bertvv/centos72"
 config.vm.provider "virtualbox" do |vb|
      vb.gui = true
-     vb.memory = 2048
+     vb.memory = 1048
      vb.cpus = 1
    end
 
@@ -33,6 +33,7 @@ config.vm.provider "virtualbox" do |vb|
        yum install -y httpd
        yum install -y net-tools
        yum install -y git
+       yum install -y curl
        systemctl stop firewalld
        systemctl disable firewalld
        cp /vagrant/mod_jk.so /etc/httpd/modules/   
@@ -65,6 +66,9 @@ config.vm.provider "virtualbox" do |vb|
        echo "RUN_AS_USER="nexus"" >> /app/nexus/bin/nexus
        cd /app/nexus/bin/
        ln -s /app/nexus/bin/nexus /etc/init.d/nexus
+       yum install -y yum-utils
+       yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+       yum -y install docker-ce
        SHELL
     end
   
@@ -93,7 +97,12 @@ config.vm.provider "virtualbox" do |vb|
      systemctl enable tomcat 
      systemctl start tomcat 
      mkdir /usr/share/tomcat/webapps/testapp
-     echo "tomcat #{i}" >> /usr/share/tomcat/webapps/testapp/index.html       
+     echo "tomcat #{i}" >> /usr/share/tomcat/webapps/testapp/index.html
+     
+     yum install -y yum-utils
+     yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+     yum -y install docker-ce
+
      SHELL
    end
   end
