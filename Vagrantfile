@@ -42,7 +42,7 @@ config.vm.provider "virtualbox" do |vb|
        systemctl start docker
        cd /vagrant
        wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-5.0.1-1.x86_64.rpm
-       yum localinstall grafana-5.0.1-1.x86_64.rpm
+       yum localinstall -y grafana-5.0.1-1.x86_64.rpm
        yum install -y collectd
 
   
