@@ -16,8 +16,8 @@ Vagrant.configure("2") do |config|
 config.vm.box = "bertvv/centos72"
 config.vm.provider "virtualbox" do |vb|
      vb.gui = true
-     vb.memory = 2048
-     vb.cpus = 1
+     vb.memory = 2848
+     vb.cpus = 2
    end
 
     config.vm.define "httpd" do |httpd|
@@ -29,25 +29,21 @@ config.vm.provider "virtualbox" do |vb|
     httpd.vm.network "forwarded_port", guest: 8086, host: 18086
     httpd.vm.network "private_network", ip: "192.168.100.100"
     httpd.vm.provision "shell", inline: <<-SHELL
+       systemctl stop firewalld
+       systemctl disable firewalld
+       yum install -y epel-release
        yum install -y java-1.8.0-openjdk
        yum install -y net-tools
        yum install -y curl
        yum install -y yum-utils
-       yum install -y epel-release
-       yum install -y collectd
-       echo "<Plugin "network">" >> /etc/collectd.conf
-       echo "Server "192.168.100.100" "25826"" >> /etc/collectd.conf
-       echo "</Plugin "network">" >> /etc/collectd.conf
        yum-config-manager \ --add-repo \ https://download.docker.com/linux/centos/docker-ce.repo
        yum install -y docker-ce
        systemctl enable docker
        systemctl start docker
-       docker run -d --name=grafana -p 3000:3000 grafana/grafana
-      #  echo "[[collectd]]" >> /etc/influxdb/influxdb.conf
-      #  echo "enabled = true" >> /etc/influxdb/influxdb.conf
-      #  echo "bind-address = ":25826"" >> /etc/influxdb/influxdb.conf
-      #  echo "typesdb = "/usr/share/collectd/types.db"" >> /etc/influxdb/influxdb.conf
-      #  echo "database = "collectd"" >> /etc/influxdb/influxdb.conf
+       cd /vagrant
+       wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-5.0.1-1.x86_64.rpm
+       yum localinstall grafana-5.0.1-1.x86_64.rpm
+       yum install -y collectd
 
   
      SHELL
@@ -58,19 +54,14 @@ config.vm.provider "virtualbox" do |vb|
     node.vm.hostname = "tomcat"
     node.vm.network "private_network", ip: "192.168.100.101"
     node.vm.provision "shell", inline: <<-SHELL
+       systemctl stop firewalld
+       systemctl disable firewalld
+       yum install -y epel-release
        yum install -y net-tools
        yum install -y yum-utils
        yum install -y curl
-       yum install -y epel-release
        yum install -y collectd
-       echo "<Plugin "network">" >> /etc/collectd.conf
-       echo "Server "192.168.100.101" "25826"" >> /etc/collectd.conf
-       echo "</Plugin "network">" >> /etc/collectd.conf 
-       echo "[[collectd]]" >> /etc/influxdb/influxdb.conf
-       echo "enabled = true" >> /etc/influxdb/influxdb.conf
-       echo "bind-address = ":25826"" >> /etc/influxdb/influxdb.conf
-       echo "typesdb = "/usr/share/collectd/types.db"" >> /etc/influxdb/influxdb.conf
-       echo "database = "collectd"" >> /etc/influxdb/influxdb.conf      
+  
      SHELL
    end
   end
