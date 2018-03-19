@@ -16,54 +16,29 @@ Vagrant.configure("2") do |config|
 config.vm.box = "bertvv/centos72"
 config.vm.provider "virtualbox" do |vb|
      vb.gui = true
-     vb.memory = 2848
+     vb.memory = 2048
      vb.cpus = 2
    end
 
     config.vm.define "httpd" do |httpd|
     httpd.vm.hostname = "httpd"
     httpd.vm.network "forwarded_port", guest: 9200, host: 19200 
-    httpd.vm.network "forwarded_port", guest: 5044, host: 15044
-    httpd.vm.network "forwarded_port", guest: 5601, host: 15601
-    httpd.vm.network "forwarded_port", guest: 3000, host: 13000
-    httpd.vm.network "forwarded_port", guest: 8086, host: 18086
+
     httpd.vm.network "private_network", ip: "192.168.100.100"
     httpd.vm.provision "shell", inline: <<-SHELL
        systemctl stop firewalld
        systemctl disable firewalld
-       yum install -y epel-release
-       yum install -y java-1.8.0-openjdk
-       yum install -y net-tools
-       yum install -y curl
-       yum install -y yum-utils
-       yum-config-manager \ --add-repo \ https://download.docker.com/linux/centos/docker-ce.repo
-       yum install -y docker-ce
-       systemctl enable docker
-       systemctl start docker
-       cd /vagrant
-       wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-5.0.1-1.x86_64.rpm
-       yum localinstall -y grafana-5.0.1-1.x86_64.rpm
-       yum install -y collectd
+       cd /tmp
+       rpm -Uvh https://packages.chef.io/files/stable/chefdk/2.4.17/el/7/chefdk-2.4.17-1.el7.x86_64.rpm
+
+
 
   
      SHELL
     end
   
 
-    config.vm.define "tomcat" do |node|
-    node.vm.hostname = "tomcat"
-    node.vm.network "private_network", ip: "192.168.100.101"
-    node.vm.provision "shell", inline: <<-SHELL
-       systemctl stop firewalld
-       systemctl disable firewalld
-       yum install -y epel-release
-       yum install -y net-tools
-       yum install -y yum-utils
-       yum install -y curl
-       yum install -y collectd
-  
-     SHELL
-   end
+   
   end
  
 
